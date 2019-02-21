@@ -12,6 +12,7 @@ buildscript {
 apply plugin: "com.gradle.plugin-publish"
 apply plugin: 'groovy'
 apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
 repositories {
     mavenCentral()
@@ -20,23 +21,47 @@ repositories {
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    compile 'com.amazonaws:aws-java-sdk-s3:1.11.176'
+    compile 'com.amazonaws:aws-java-sdk-s3:1.11.502'
     testCompile 'junit:junit:4.12'
 }
 
-group = 'com.rambabusaravanan.gradle'
-version = '1.0.2'
+group = 'com.yantranet.gradle'
+version = '1.0.10'
 
 pluginBundle {
-  website = 'https://rambabusaravanan.github.io/gradle-android-s3'
-  vcsUrl = 'https://github.com/rambabusaravanan/gradle-android-s3.git'
-  description = 'A simple light weight Gradle plugin for Android project to upload apk of all the build variants to AWS S3. This helps you to maintain all flavour of every version easily in S3. For usage, please visit docs for usage ..'
-  tags = ['AWS', 'S3', 'Android', 'APK', 'Product Flavours', 'Build Types']
+    website = 'https://github.com/vishnuganta22/gradle-android-s3'
+    vcsUrl = 'https://github.com/vishnuganta22/gradle-android-s3'
+    description = 'A simple light weight Gradle plugin for Java project to upload files to AWS S3.'
+    tags = ['AWS', 'S3', 'Java']
 
   plugins {
-    androidS3Plugin {
-      id = 'com.rambabusaravanan.android-s3'
-      displayName = 'Android S3 Uploader'
+    javaS3Plugin {
+      id = 'com.yantranet.java-s3'
+      displayName = 'java S3 Uploader'
     }
   }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifact source:'./build/libs/' + rootProject.name + '-' + rootProject.version + '.jar' , extension:'jar'
+            groupId = 'com.yantranet.gradle'
+            artifactId = 'java-s3'
+
+            pom.withXml {
+                def dependenciesNode = asNode().appendNode('dependencies')
+
+                //Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
+                configurations.compile.allDependencies.each {
+                    if (it.name != "unspecified") {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
+                }
+            }
+        }
+    }
 }
