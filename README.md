@@ -1,8 +1,6 @@
-# Android S3 Uploader
+# Java S3 Uploader
 
-Upload the apk of all the build variants to S3 and maintain all flavours of every version.
-
-Plugin Url : [https://plugins.gradle.org/plugin/com.rambabusaravanan.android-s3](https://plugins.gradle.org/plugin/com.rambabusaravanan.android-s3)
+Upload Files to S3.
 
 ## Step 1
 
@@ -16,7 +14,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.com.rambabusaravanan.gradle:android-s3:1.0.2"
+    classpath "gradle.plugin.com.yantranet.gradle:java-s3:1.0.10"
   }
 }
 
@@ -28,37 +26,36 @@ Add the following to app's `build.gradle` below `android` block or to the bottom
 ```
 apply plugin: "com.rambabusaravanan.android-s3"
 
-s3 {
+upload {
     accessKey = 'AKIA****************'
     secretKey = 'TPSi************************************'
     bucketName = "apkbuilder"
+    fileLocalPaths = ["app/build/outputs/apk","example.txt"] localFilePaths are need to uploaded to S3
 
-    keyPath = "path/to/key"                 // (Optional) Default: "com.packagename/versionname"
-    uploadPath = "app/build/outputs/apk"    // (Optional) Default: "$target.buildDir/outputs/apk"
+    s3Object = "path/to/key"                     // (Optional) 
+    cannedAccessControlList = "Private"          //(Optional) {expected values : 'Private', 'AwsExecRead', 
+    'BucketOwnerFullControl', 'BucketOwnerRead', 'LogDeliveryWrite', 'AuthenticatedRead', 'PublicReadWrite', 
+    'PublicRead'}
 }
 
-// (Optional but recommended)
-uploadApk {
-    dependsOn assemble
-}
 ```
 
 ## Execution
 
 ```
-$ ./gradlew uploadApk  # or $ ./gradlew uApk
+$ ./gradlew upload
 ```
 
 ## Sample Log 
 
 ```
-andro@thiyagab:~/workspace/gradle-plugin/android-example$ ./gradlew uploadApk
+andro@thiyagab:~/workspace/gradle-plugin/android-example$ ./gradlew upload
 ...
 ...
 ...
 > Task :app:uploadApk
 Upload src : /home/andro/workspace/gradle-plugin/android-example/app/build/outputs/apk
-Upload des : s3://apkbuilder/com.rambabusaravanan.gradlepluginconsumer/1.0
+Uploading to  :: s3://apkbuilder/com.rambabusaravanan.gradlepluginconsumer/1.0
 Upload finished ..
 
 BUILD SUCCESSFUL
