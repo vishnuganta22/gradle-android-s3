@@ -4,9 +4,8 @@ import com.amazonaws.AmazonClientException
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.auth.AWSCredentials
 import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.event.ProgressEvent
-import com.amazonaws.services.s3.AmazonS3Client
-import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.model.CannedAccessControlList
 import com.amazonaws.services.s3.model.PutObjectRequest
 import com.amazonaws.services.s3.transfer.PersistableTransfer
@@ -18,15 +17,12 @@ import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 
 import javax.annotation.Nonnull
-import java.util.logging.FileHandler
 
 class UploadTask extends DefaultTask {
-    String accessKey, secretKey, bucketName, s3Object, cannedAccessControlList
+    String accessKey, secretKey, bucketName, s3Object, cannedAccessControlList, profileName
     String[] fileLocalPaths
 
     private void validate() {
-        if (accessKey == null || accessKey.isEmpty()) throw new GradleException('accessKey can\'t be empty or NULL')
-        if (secretKey == null || secretKey.isEmpty()) throw new GradleException('secretKey can\'t be empty or NULL')
         if (bucketName == null || bucketName.isEmpty()) throw new GradleException('bucketName can\'t be empty or NULL')
         if (fileLocalPaths.length <= 0) throw new GradleException('No files to upload')
         for (String filePath : fileLocalPaths) {
@@ -83,6 +79,11 @@ class UploadTask extends DefaultTask {
         manager.shutdownNow()
     }
 
+    private static void validateAWSCredentials(AWSCredentials awsCredentials) {
+        if (awsCredentials.AWSAccessKeyId == null || awsCredentials.AWSAccessKeyId.isEmpty()) throw new IllegalArgumentException("Invalid AWS Credentials")
+        if (awsCredentials.AWSSecretKey == null || awsCredentials.AWSSecretKey.isEmpty()) throw new IllegalArgumentException("Invalid AWS Credentials")
+    }
+
     void reset() {
         accessKey = ''
         secretKey = ''
@@ -97,13 +98,31 @@ class UploadTask extends DefaultTask {
     void run() {
         validate()
         AWSCredentials credentials = getCredentials(accessKey, secretKey)
+        try {
+            validateAWSCredentials(credentials)
+        } catch (IllegalArgumentException ignore) {
+            if (profileName == null || profileName.isEmpty()) {
+                credentials = new ProfileCredentialsProvider().getCredentials()
+                validateAWSCredentials(credentials)
+            } else {
+                try {
+                    credentials = new ProfileCredentialsProvider(profileName).getCredentials()
+                    validateAWSCredentials(credentials)
+                } catch (IllegalArgumentException ignored) {
+                    credentials = new ProfileCredentialsProvider().getCredentials()
+                    validateAWSCredentials(credentials)
+                }
+            }
+        }
+        ProfileCredentialsProvider provider = new ProfileCredentialsProvider()
+        provider.credentials
         if (cannedAccessControlList != null && !cannedAccessControlList.isEmpty()) {
             println('cannedAccessControlList' + CannedAccessControlList.valueOf(cannedAccessControlList))
-            for(String filePath : fileLocalPaths){
+            for (String filePath : fileLocalPaths) {
                 upload(credentials, bucketName, s3Object, filePath, CannedAccessControlList.valueOf(cannedAccessControlList))
             }
         } else {
-            for(String filePath : fileLocalPaths){
+            for (String filePath : fileLocalPaths) {
                 upload(credentials, bucketName, s3Object, filePath)
             }
         }

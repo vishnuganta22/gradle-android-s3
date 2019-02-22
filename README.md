@@ -26,9 +26,11 @@ Add the following to app's `build.gradle` below `android` block or to the bottom
 ```
 apply plugin: "com.rambabusaravanan.android-s3"
 
+Example 1
+
 upload {
-    accessKey = 'AKIA****************'
-    secretKey = 'TPSi************************************'
+    accessKey = 'AKIA****************'                      (Optional)
+    secretKey = 'TPSi************************************'  (Optional)
     bucketName = "apkbuilder"
     fileLocalPaths = ["app/build/outputs/apk","example.txt"] localFilePaths are need to uploaded to S3
 
@@ -36,6 +38,17 @@ upload {
     cannedAccessControlList = "Private"          //(Optional) {expected values : 'Private', 'AwsExecRead', 
     'BucketOwnerFullControl', 'BucketOwnerRead', 'LogDeliveryWrite', 'AuthenticatedRead', 'PublicReadWrite', 
     'PublicRead'}
+}
+
+Example 2
+
+upload {
+    profileName = 'test-profile'                // (Optional) name of the aws-profile
+    bucketName = "apkbuilder"
+    fileLocalPaths = ["app/build/outputs/apk","example.txt"] 
+    
+    s3Object = "path/to/key"                     
+    cannedAccessControlList = "Private"
 }
 
 ```
