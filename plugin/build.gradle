@@ -26,7 +26,7 @@ dependencies {
 }
 
 group = 'com.yantranet.gradle'
-version = '1.0.10'
+version = '1.0.11'
 
 pluginBundle {
     website = 'https://github.com/vishnuganta22/gradle-android-s3'
