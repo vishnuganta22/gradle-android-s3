@@ -97,8 +97,9 @@ class UploadTask extends DefaultTask {
     @TaskAction
     void run() {
         validate()
-        AWSCredentials credentials = getCredentials(accessKey, secretKey)
+        AWSCredentials credentials
         try {
+            credentials = getCredentials(accessKey, secretKey)
             validateAWSCredentials(credentials)
         } catch (IllegalArgumentException ignore) {
             if (profileName == null || profileName.isEmpty()) {
@@ -114,8 +115,7 @@ class UploadTask extends DefaultTask {
                 }
             }
         }
-        ProfileCredentialsProvider provider = new ProfileCredentialsProvider()
-        provider.credentials
+        if(credentials == null) throw new IllegalArgumentException("Invalid AWS Credentials")
         if (cannedAccessControlList != null && !cannedAccessControlList.isEmpty()) {
             println('cannedAccessControlList' + CannedAccessControlList.valueOf(cannedAccessControlList))
             for (String filePath : fileLocalPaths) {
