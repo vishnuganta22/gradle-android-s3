@@ -1,6 +1,6 @@
-# Java S3 Uploader
+# Java S3 API
 
-Upload Files to S3.
+Upload and Download Files to S3.
 
 ## Step 1
 
@@ -24,7 +24,7 @@ buildscript {
 Add the following to app's `build.gradle` below `android` block or to the bottom most
 
 ```
-apply plugin: "com.rambabusaravanan.android-s3"
+apply plugin: "com.yantranet.java-s3"
 
 Example 1
 
@@ -34,7 +34,7 @@ upload {
     bucketName = "apkbuilder"
     fileLocalPaths = ["app/build/outputs/apk","example.txt"] localFilePaths are need to uploaded to S3
 
-    s3Object = "path/to/key"                     // (Optional) 
+    key = "path/to/key"                           // (Optional) 
     cannedAccessControlList = "Private"          //(Optional) {expected values : 'Private', 'AwsExecRead', 
     'BucketOwnerFullControl', 'BucketOwnerRead', 'LogDeliveryWrite', 'AuthenticatedRead', 'PublicReadWrite', 
     'PublicRead'}
@@ -47,8 +47,18 @@ upload {
     bucketName = "apkbuilder"
     fileLocalPaths = ["app/build/outputs/apk","example.txt"] 
     
-    s3Object = "path/to/key"                     
+    key = "path/to/key"                     
     cannedAccessControlList = "Private"
+}
+
+Example 3
+
+upload {
+    accessKey = 'AKIA****************'
+    secretKey = 'TPSi************************************'
+    bucketName = 'apkbuilder'
+    key = 'java/testing/test.txt'
+    localFilePath = new File(rootDir, 'text.txt')
 }
 
 ```
@@ -58,6 +68,11 @@ upload {
 ```
 $ ./gradlew upload
 ```
+
+```
+$ ./gradlew download
+```
+
 
 ## Sample Log 
 

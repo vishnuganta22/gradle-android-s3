@@ -3,8 +3,6 @@ package com.yantranet.gradle
 import com.amazonaws.AmazonClientException
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.auth.AWSCredentials
-import com.amazonaws.auth.BasicAWSCredentials
-import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.event.ProgressEvent
 import com.amazonaws.services.s3.model.CannedAccessControlList
 import com.amazonaws.services.s3.model.PutObjectRequest
@@ -12,14 +10,11 @@ import com.amazonaws.services.s3.transfer.PersistableTransfer
 import com.amazonaws.services.s3.transfer.TransferManager
 import com.amazonaws.services.s3.transfer.Upload
 import com.amazonaws.services.s3.transfer.internal.S3ProgressListener
-import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 
-import javax.annotation.Nonnull
-
-class UploadTask extends DefaultTask {
-    String accessKey, secretKey, bucketName, s3Object, cannedAccessControlList, profileName
+class UploadTask extends S3Task {
+    String cannedAccessControlList
     String[] fileLocalPaths
 
     private void validate() {
@@ -36,12 +31,8 @@ class UploadTask extends DefaultTask {
         if (new File(filePath).isDirectory()) throw new GradleException(filePath + ' file represents a folder')
     }
 
-    private static BasicAWSCredentials getCredentials(@Nonnull String accessKey, @Nonnull String secretKey) {
-        new BasicAWSCredentials(accessKey, secretKey)
-    }
-
-    private static void upload(AWSCredentials credentials, String bucketName, String s3Object, String uploadPath) {
-        upload(credentials, new PutObjectRequest(bucketName, s3Object, new File(uploadPath)))
+    private static void upload(AWSCredentials credentials, String bucketName, String key, String uploadPath) {
+        upload(credentials, new PutObjectRequest(bucketName, key, new File(uploadPath)))
     }
 
     private static void upload(AWSCredentials credentials, String bucketName, String s3Object, String uploadPath, CannedAccessControlList cannedAccessControlList) {
@@ -56,7 +47,8 @@ class UploadTask extends DefaultTask {
         try {
             println("Upload src : " + objectRequest.getFile().absolutePath)
             println(" Uploading to  :: " + 'https://s3.amazonaws.com/' + objectRequest.getBucketName() + '/' + objectRequest.getKey())
-            Upload upload = manager.upload(objectRequest, new S3ProgressListener() {
+            Upload upload = manager.upload(objectRequest)
+            upload.addProgressListener(new S3ProgressListener() {
                 @Override
                 void onPersistableTransfer(PersistableTransfer persistableTransfer) {
 
@@ -79,16 +71,11 @@ class UploadTask extends DefaultTask {
         manager.shutdownNow()
     }
 
-    private static void validateAWSCredentials(AWSCredentials awsCredentials) {
-        if (awsCredentials.AWSAccessKeyId == null || awsCredentials.AWSAccessKeyId.isEmpty()) throw new IllegalArgumentException("Invalid AWS Credentials")
-        if (awsCredentials.AWSSecretKey == null || awsCredentials.AWSSecretKey.isEmpty()) throw new IllegalArgumentException("Invalid AWS Credentials")
-    }
-
     void reset() {
         accessKey = ''
         secretKey = ''
         bucketName = ''
-        s3Object = ''
+        key = ''
         fileLocalPath = ''
         cannedAccessControlList = ''
         accessControlList = null
@@ -97,33 +84,16 @@ class UploadTask extends DefaultTask {
     @TaskAction
     void run() {
         validate()
-        AWSCredentials credentials
-        try {
-            credentials = getCredentials(accessKey, secretKey)
-            validateAWSCredentials(credentials)
-        } catch (IllegalArgumentException ignore) {
-            if (profileName == null || profileName.isEmpty()) {
-                credentials = new ProfileCredentialsProvider().getCredentials()
-                validateAWSCredentials(credentials)
-            } else {
-                try {
-                    credentials = new ProfileCredentialsProvider(profileName).getCredentials()
-                    validateAWSCredentials(credentials)
-                } catch (IllegalArgumentException ignored) {
-                    credentials = new ProfileCredentialsProvider().getCredentials()
-                    validateAWSCredentials(credentials)
-                }
-            }
-        }
+        AWSCredentials credentials = getAWSCredentials()
         if(credentials == null) throw new IllegalArgumentException("Invalid AWS Credentials")
         if (cannedAccessControlList != null && !cannedAccessControlList.isEmpty()) {
             println('cannedAccessControlList' + CannedAccessControlList.valueOf(cannedAccessControlList))
             for (String filePath : fileLocalPaths) {
-                upload(credentials, bucketName, s3Object, filePath, CannedAccessControlList.valueOf(cannedAccessControlList))
+                upload(credentials, bucketName, key, filePath, CannedAccessControlList.valueOf(cannedAccessControlList))
             }
         } else {
             for (String filePath : fileLocalPaths) {
-                upload(credentials, bucketName, s3Object, filePath)
+                upload(credentials, bucketName, key, filePath)
             }
         }
     }
