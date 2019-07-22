@@ -2,9 +2,8 @@ package com.yantranet.gradle
 
 import com.amazonaws.auth.AWSCredentials
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
-import org.gradle.api.DefaultTask
 
-abstract class S3Task extends DefaultTask {
+class S3Data {
     String accessKey, secretKey, profileName, bucketName, key
 
     protected AWSCredentials getAWSCredentials() {
@@ -28,5 +27,4 @@ abstract class S3Task extends DefaultTask {
         }
         return credentials
     }
-
 }
