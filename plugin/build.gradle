@@ -5,7 +5,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "com.gradle.publish:plugin-publish-plugin:0.9.7"
+    classpath "com.gradle.publish:plugin-publish-plugin:0.10.1"
   }
 }
 
@@ -21,12 +21,12 @@ repositories {
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    compile 'com.amazonaws:aws-java-sdk-s3:1.11.502'
+    compile 'com.amazonaws:aws-java-sdk-s3:1.11.751'
     testCompile 'junit:junit:4.12'
 }
 
 group = 'com.yantranet.gradle'
-version = '1.0.14'
+version = '1.0.15'
 
 pluginBundle {
     website = 'https://github.com/vishnuganta22/gradle-android-s3'
