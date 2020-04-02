@@ -19,7 +19,9 @@ class DownloadTask extends DefaultTask {
             Utils.validate(downloadData)
             AWSCredentials credentials = downloadData.getAWSCredentials()
             if (credentials == null) throw new IllegalArgumentException('Invalid AWS Credentials')
-            Utils.download(downloadData.localFilePath, credentials, downloadData.bucketName, downloadData.key)
+            for (String filePath : downloadData.fileLocalPaths) {
+                Utils.download(filePath, credentials, downloadData.bucketName, downloadData.key)
+            }
         }
     }
 }
