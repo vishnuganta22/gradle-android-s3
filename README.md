@@ -14,7 +14,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.com.yantranet.gradle:java-s3:1.0.14"
+    classpath "gradle.plugin.com.yantranet.gradle:java-s3:1.0.15"
   }
 }
 
