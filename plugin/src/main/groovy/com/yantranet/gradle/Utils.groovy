@@ -40,7 +40,10 @@ class Utils {
     static void validate(DownloadData downloadData) {
         if (downloadData == null) throw new GradleException('downloadData can\'t be NULL')
         if (downloadData.bucketName == null || downloadData.bucketName.isEmpty()) throw new GradleException('bucketName can\'t be empty or NULL')
-        if (downloadData.localFilePath == null || downloadData.localFilePath.isEmpty()) throw new GradleException('localFilePath can\'t be empty or NULL')
+        if (downloadData.fileLocalPaths.length <= 0) throw new GradleException('No files to download')
+        for (String filePath : downloadData.fileLocalPaths) {
+            validateFilePath(filePath)
+        }
     }
 
     static void download(String localFilePath, AWSCredentials credentials, String bucketName, String key) {
