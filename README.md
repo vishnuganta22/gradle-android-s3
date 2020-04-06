@@ -99,7 +99,7 @@ downloads {
         secretKey = 'TPSi************************************'
         bucketName = 'apkbuilder'
         key = 'java/testing/test.txt'
-        localFilePath = new File(rootDir, 'text.txt')
+        fileLocalPaths = [new File(rootDir, 'text.txt')]
     }
 }
 
@@ -110,14 +110,14 @@ downloads.create('devDownloads', {
         secretKey = 'TPSi************************************'
         bucketName = 'apkbuilder'
         key = 'java/testing/test.txt'
-        localFilePath = new File(rootDir, 'text.txt')
+        fileLocalPaths = [new File(rootDir, 'text.txt')]
 })
 downloads.create('stagingDownloads', {
         accessKey = 'AKIA****************'
         secretKey = 'TPSi************************************'
         bucketName = 'apkbuilder'
         key = 'java/testing/test.txt'
-        localFilePath = new File(rootDir, 'text.txt')
+        fileLocalPaths = [new File(rootDir, 'text.txt')]
 })
 
 ```
