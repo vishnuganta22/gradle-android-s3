@@ -42,7 +42,7 @@ class Utils {
         if (downloadData.bucketName == null || downloadData.bucketName.isEmpty()) throw new GradleException('bucketName can\'t be empty or NULL')
         if (downloadData.fileLocalPaths.length <= 0) throw new GradleException('No files to download')
         for (String filePath : downloadData.fileLocalPaths) {
-            validateFilePath(filePath)
+            if (filePath == null || filePath.isEmpty()) throw new GradleException(" filePath can't be NULL or empty ")
         }
     }
 
